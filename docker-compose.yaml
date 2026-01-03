@@ -1,20 +1,22 @@
 services:
-  app:
-    build: .
-    networks:
-      - java-app-backend-network
+  backend:
+    build: ./backend
+    env_file:
+      - .env.local.backend
     ports:
-      - "${EXPOSE_APP_PORT}:8080"
+      - "${EXPOSE_BACKEND_PORT}:8080"
     tty: true
     stdin_open: true
     depends_on:
       - db
     volumes:
-      - ./:/app
+      - ./backend:/app
+    entrypoint: ["./gradlew", "bootRun"]
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/${MYSQL_DATABASE}
       - SPRING_DATASOURCE_USERNAME=${MYSQL_ROOT_USER}
       - SPRING_DATASOURCE_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - SPRING_DOCKER_COMPOSE_ENABLED=false
       - JAVA_OPTS=-Dspring.devtools.restart.enabled=true
 
   db:
@@ -24,19 +26,23 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_USER=${MYSQL_USER}
-    networks:
-      - java-app-backend-network
     ports:
       - "${EXPOSE_DATABASE_PORT}:3306"
     volumes:
-      - java-app-backend-data:/var/lib/mysql
+      - java-app-database:/var/lib/mysql
 
-networks:
-  java-app-backend-network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.44.0.0/24
+  frontend:
+    build:
+      context: ./frontend
+    env_file:
+      - .env.local.frontend
+    ports:
+      - "${EXPOSE_FRONTEND_PORT}:3000"
+    volumes:
+      - ./frontend:/app
+      - java-app-frontend-node-modules:/app/node_modules
+    command: sh -c "pnpm dev -o"
 
 volumes:
-  java-app-backend-data:
+  java-app-frontend-node-modules:
+  java-app-database:

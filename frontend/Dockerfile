@@ -1,13 +1,13 @@
-FROM node:22.13.1-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
-COPY . ./
-
-RUN rm -rf node_modules
-RUN rm -rf .nuxt
-RUN rm -rf .output
+COPY package*.json .
 
 RUN npm install -g pnpm@latest-10
 
+RUN pnpm config set registry https://registry.npmmirror.com
+
 RUN pnpm install
+
+COPY . .

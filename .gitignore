@@ -35,3 +35,15 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Env files ###
+.env
+.env.*
+!.env.sample
+!.env.*.sample
+
+### Node ###
+node_modules/
+**/.pnpm-store/
+**/.nuxt/
+**/.output/
